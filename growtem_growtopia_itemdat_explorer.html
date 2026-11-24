@@ -1,0 +1,2086 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrowTem - Growtopia Items.dat Live Radar & Official Proxy Sync</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gt: {
+                            dark: '#090d16',
+                            card: '#111726',
+                            cardHover: '#182135',
+                            border: '#1e293b',
+                            borderBright: '#334155',
+                            accent: '#10b981',
+                            cyan: '#06b6d4',
+                            gold: '#f59e0b',
+                            purple: '#8b5cf6',
+                            danger: '#ef4444'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090d16;
+            color: #e2e8f0;
+        }
+        /* Custom Glowing Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10b981;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+            50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.4); }
+        }
+        .glow-active {
+            animation: pulse-glow 2s infinite;
+        }
+        .strike-through {
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500/30 selection:text-emerald-400">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- Header Navigation -->
+    <header class="border-b border-gt-border bg-gt-card/90 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- Logo & Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-cyan-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-extrabold text-xl tracking-tighter">
+                    GT
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base text-white flex items-center gap-2">
+                        GrowTem
+                        <span id="header-source-tag" class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">
+                            Official CDN Mode
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-400">XOR Cipher Parser, Live CDN Proxy Sync & Leaks Radar</p>
+                </div>
+            </div>
+
+            <!-- Main Tab Navigation -->
+            <nav class="hidden md:flex items-center gap-1 bg-gt-dark p-1 rounded-xl border border-gt-border text-xs font-semibold">
+                <button onclick="switchTab('upcoming')" id="nav-upcoming" class="tab-btn px-4 py-2 rounded-lg text-emerald-400 bg-gt-card border border-emerald-500/30 transition flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    ⚡ Upcoming & Leaks
+                    <span id="badge-upcoming-count" class="bg-amber-500/20 text-amber-400 text-[10px] px-1.5 py-0.5 rounded-full border border-amber-500/30 font-mono">0</span>
+                </button>
+                <button onclick="switchTab('explorer')" id="nav-explorer" class="tab-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                    📦 Semua Item
+                    <span id="badge-total-count" class="bg-gt-border text-slate-300 text-[10px] px-1.5 py-0.5 rounded-full font-mono">0</span>
+                </button>
+                <button onclick="switchTab('diff')" id="nav-diff" class="tab-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                    ⚔️ Bandingkan Diff
+                    <span id="badge-new-diff-count" class="hidden bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded-full border border-emerald-500/30 font-mono">NEW</span>
+                </button>
+                <button onclick="switchTab('settings')" id="nav-settings" class="tab-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                    ⚙️ Proxy & Watcher
+                </button>
+            </nav>
+
+            <!-- Top Header Control Action Buttons -->
+            <div class="flex items-center gap-2">
+                <button onclick="openProxyScriptModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 rounded-lg border border-cyan-500/30 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    Script Proxy Worker
+                </button>
+                <button onclick="triggerManualSync()" class="px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition shadow-md shadow-emerald-600/20 flex items-center gap-1.5">
+                    <svg id="sync-spinner" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Sync Sekarang
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Bar -->
+        <div class="md:hidden flex overflow-x-auto border-t border-gt-border bg-gt-dark p-2 gap-2 text-xs font-medium scrollbar-none">
+            <button onclick="switchTab('upcoming')" id="mob-nav-upcoming" class="mob-tab-btn whitespace-nowrap px-3 py-1.5 rounded bg-gt-card text-emerald-400 border border-emerald-500/30">⚡ Upcoming & Leaks</button>
+            <button onclick="switchTab('explorer')" id="mob-nav-explorer" class="mob-tab-btn whitespace-nowrap px-3 py-1.5 rounded text-slate-400">📦 Semua Item</button>
+            <button onclick="switchTab('diff')" id="mob-nav-diff" class="mob-tab-btn whitespace-nowrap px-3 py-1.5 rounded text-slate-400">⚔️ Bandingkan Diff</button>
+            <button onclick="switchTab('settings')" id="mob-nav-settings" class="mob-tab-btn whitespace-nowrap px-3 py-1.5 rounded text-slate-400">⚙️ Proxy & Pengaturan</button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+        <!-- PROXY CONNECTIVITY & AUTO-SYNC HEADER BAR -->
+        <div class="bg-gradient-to-r from-gt-card via-gt-card to-emerald-950/20 p-4 rounded-2xl border border-gt-border space-y-3 shadow-xl">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                
+                <!-- Connection Status & Meta Info -->
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <div id="proxy-status-icon-bg" class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <span id="live-indicator-dot" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 border-2 border-gt-card"></span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 id="db-status-title" class="text-sm font-bold text-white">Official Ubisoft CDN: Menunggu Koneksi Proxy</h2>
+                            <span id="cdn-meta-badge" class="hidden text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-semibold">
+                                Meta: -
+                            </span>
+                        </div>
+                        <p id="db-status-desc" class="text-xs text-slate-400 mt-0.5">Masukkan URL Proxy Cloudflare Tunnel / Node.js untuk memuat 100% database items.dat asli dari server Ubisoft.</p>
+                    </div>
+                </div>
+
+                <!-- Auto-Poll Switch & Timer Controls -->
+                <div class="flex flex-wrap items-center gap-3 text-xs w-full lg:w-auto justify-between lg:justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-gt-border">
+                    <div class="flex items-center gap-2 bg-gt-dark px-3 py-1.5 rounded-xl border border-gt-border">
+                        <span class="text-slate-400">Auto-Sync CDN:</span>
+                        <button onclick="toggleAutoRefresh()" id="autorefresh-toggle-btn" class="font-bold text-emerald-400 hover:underline flex items-center gap-1">
+                            <span id="autorefresh-status-text">ON (30s)</span>
+                        </button>
+                        <div class="w-16 bg-gt-border h-2 rounded-full overflow-hidden ml-1">
+                            <div id="countdown-progress" class="bg-emerald-400 h-full w-full transition-all duration-1000"></div>
+                        </div>
+                    </div>
+
+                    <button onclick="openProxyScriptModal()" class="px-3 py-1.5 text-xs bg-gt-dark hover:bg-gt-border text-cyan-300 rounded-xl border border-gt-border transition flex items-center gap-1 font-medium">
+                        📜 Dapatkan Code Proxy
+                    </button>
+                </div>
+            </div>
+
+            <!-- Live Database Quick Telemetry Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                <div class="bg-gt-dark/70 px-3 py-2 rounded-xl border border-gt-border flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Total Database:</span>
+                    <span id="telemetry-total-items" class="text-xs font-bold font-mono text-white">0 Item</span>
+                </div>
+                <div class="bg-gt-dark/70 px-3 py-2 rounded-xl border border-gt-border flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Versi items.dat:</span>
+                    <span id="telemetry-dat-version" class="text-xs font-bold font-mono text-cyan-400">-</span>
+                </div>
+                <div class="bg-gt-dark/70 px-3 py-2 rounded-xl border border-gt-border flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Sync Terakhir:</span>
+                    <span id="telemetry-last-sync" class="text-xs font-bold font-mono text-emerald-400">Belum Sync</span>
+                </div>
+                <div class="bg-gt-dark/70 px-3 py-2 rounded-xl border border-gt-border flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Cache Offline:</span>
+                    <span id="telemetry-cache-status" class="text-xs font-bold font-mono text-slate-400">Kosong</span>
+                </div>
+            </div>
+
+            <!-- Quick Proxy URL Connection Input Row -->
+            <div class="flex flex-col sm:flex-row gap-2 pt-1">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 font-mono text-xs">🌐 URL Proxy:</span>
+                    <input type="text" id="proxy-url-input" placeholder="https://nama-tunnel.trycloudflare.com/items.dat" class="w-full bg-gt-dark text-emerald-400 text-xs font-mono rounded-xl pl-28 pr-4 py-2 border border-gt-border focus:outline-none focus:border-emerald-500 transition">
+                </div>
+                <button id="btn-save-proxy" onclick="saveAndConnectProxy()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-1.5 shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span>Simpan & Hubungkan Proxy</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 1: LIVE UPCOMING & LEAKS RADAR -->
+        <section id="tab-upcoming" class="space-y-6">
+            <!-- Header Leak Summary Dashboard Card -->
+            <div class="bg-gradient-to-r from-amber-500/10 via-gt-card to-purple-500/10 p-6 rounded-2xl border border-amber-500/30 space-y-4 shadow-2xl">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 text-2xl">
+                            ⚡
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                                Radar Bocoran & Item Upcoming Live
+                                <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-normal">Real-Time CDN</span>
+                            </h2>
+                            <p class="text-xs text-slate-300">Algoritma otomatis mendeteksi ID baru tinggi, `null_item`, slot unreleased, dan tag event GT mendatang langsung dari CDN.</p>
+                        </div>
+                    </div>
+                    
+                    <button onclick="triggerManualSync()" class="px-4 py-2 text-xs font-semibold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-xl border border-emerald-500/40 transition shadow-lg flex items-center gap-1.5 shrink-0">
+                        <span>🔄 Cek Update CDN Sekarang</span>
+                    </button>
+                </div>
+
+                <!-- Metrics Counter Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-gt-dark/80 p-3 rounded-xl border border-gt-border text-center">
+                        <span class="text-[11px] text-slate-400 block">Total Leaks Terdeteksi</span>
+                        <span id="stat-upcoming-total" class="text-lg font-bold text-amber-400 font-mono">0 Item</span>
+                    </div>
+                    <div class="bg-gt-dark/80 p-3 rounded-xl border border-gt-border text-center">
+                        <span class="text-[11px] text-slate-400 block">Rentang ID Bocoran</span>
+                        <span id="stat-upcoming-range" class="text-lg font-bold text-cyan-400 font-mono">#0 - #0</span>
+                    </div>
+                    <div class="bg-gt-dark/80 p-3 rounded-xl border border-gt-border text-center">
+                        <span class="text-[11px] text-slate-400 block">Prediksi IoTM Terdekat</span>
+                        <span id="stat-iotm-name" class="text-sm font-bold text-emerald-400 truncate block mt-0.5">-</span>
+                    </div>
+                    <div class="bg-gt-dark/80 p-3 rounded-xl border border-gt-border text-center">
+                        <span class="text-[11px] text-slate-400 block">Decryption Engine</span>
+                        <span class="text-sm font-bold text-purple-400 font-mono">XOR (PBG892...)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Upcoming Items Table / List -->
+            <div class="bg-gt-card rounded-2xl border border-gt-border overflow-hidden shadow-xl">
+                <div class="p-4 border-b border-gt-border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gt-dark/50">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                        <h3 class="font-bold text-sm text-white">Daftar Item Bocoran / Upcoming (Auto Update)</h3>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportUpcomingReport('txt')" class="px-3 py-1.5 text-xs bg-gt-dark hover:bg-gt-border text-amber-300 rounded-lg border border-gt-border transition">
+                            📄 Download Laporan (.txt)
+                        </button>
+                        <button onclick="exportUpcomingReport('json')" class="px-3 py-1.5 text-xs bg-gt-dark hover:bg-gt-border text-emerald-400 rounded-lg border border-gt-border transition">
+                            💾 Export Leaks JSON
+                        </button>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-gt-border" id="upcoming-items-list">
+                    <!-- Dynamic List Items inserted by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: DATABASE EXPLORER (ALL ITEMS) -->
+        <section id="tab-explorer" class="hidden space-y-6">
+            <!-- Filter & Search Controls Bar -->
+            <div class="bg-gt-card p-4 rounded-2xl border border-gt-border space-y-4 shadow-xl">
+                <div class="flex flex-col lg:flex-row gap-3 items-center justify-between">
+                    <!-- Search Input -->
+                    <div class="relative w-full lg:w-96">
+                        <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        <input type="text" id="search-input" oninput="debouncedExplorerSearch()" placeholder="Cari Nama Item atau #ID (cth: #242, Magplant)..." class="w-full bg-gt-dark text-slate-200 text-sm rounded-xl pl-9 pr-8 py-2 border border-gt-border focus:outline-none focus:border-emerald-500 transition">
+                        <button onclick="clearExplorerSearch()" id="btn-clear-search" class="hidden absolute right-2.5 top-2.5 text-slate-400 hover:text-white text-xs px-1">✕</button>
+                    </div>
+
+                    <!-- Filter Pills -->
+                    <div class="flex flex-wrap items-center gap-1.5 w-full lg:w-auto">
+                        <button onclick="setCategoryFilter('all')" class="cat-pill px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white font-medium transition" data-cat="all">Semua</button>
+                        <button onclick="setCategoryFilter('upcoming')" class="cat-pill px-3 py-1.5 text-xs rounded-lg bg-gt-dark text-slate-300 hover:text-white border border-gt-border transition" data-cat="upcoming">⚡ Leaks / Upcoming</button>
+                        <button onclick="setCategoryFilter('new')" class="cat-pill px-3 py-1.5 text-xs rounded-lg bg-gt-dark text-slate-300 hover:text-white border border-gt-border transition" data-cat="new">✨ Baru Ditambahkan</button>
+                        <button onclick="setCategoryFilter('clothing')" class="cat-pill px-3 py-1.5 text-xs rounded-lg bg-gt-dark text-slate-300 hover:text-white border border-gt-border transition" data-cat="clothing">👔 Pakaian</button>
+                        <button onclick="setCategoryFilter('locks')" class="cat-pill px-3 py-1.5 text-xs rounded-lg bg-gt-dark text-slate-300 hover:text-white border border-gt-border transition" data-cat="locks">🔒 Lock & Door</button>
+                        <button onclick="setCategoryFilter('blocks')" class="cat-pill px-3 py-1.5 text-xs rounded-lg bg-gt-dark text-slate-300 hover:text-white border border-gt-border transition" data-cat="blocks">🧱 Solid</button>
+                        <button onclick="setCategoryFilter('seeds')" class="cat-pill px-3 py-1.5 text-xs rounded-lg bg-gt-dark text-slate-300 hover:text-white border border-gt-border transition" data-cat="seeds">🌱 Benih</button>
+                    </div>
+
+                    <!-- Sorting Options -->
+                    <div class="flex items-center gap-2 w-full lg:w-auto justify-end">
+                        <select id="sort-select" onchange="applyExplorerFilters()" class="bg-gt-dark text-slate-300 text-xs rounded-xl px-3 py-2 border border-gt-border focus:outline-none focus:border-emerald-500">
+                            <option value="id-asc">ID Terendah (#0 -> #9999)</option>
+                            <option value="id-desc">ID Tertinggi (#9999 -> #0)</option>
+                            <option value="rarity-desc">Rarity Tertinggi</option>
+                            <option value="name-asc">Nama Item (A-Z)</option>
+                        </select>
+                        <button onclick="exportItemsJSON()" class="px-3 py-2 text-xs bg-gt-dark hover:bg-gt-border text-slate-300 rounded-xl border border-gt-border transition flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Export JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Items Cards Grid -->
+            <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Dynamically generated items -->
+            </div>
+
+            <!-- Pagination Control Bar -->
+            <div id="pagination-bar" class="flex items-center justify-between bg-gt-card p-4 rounded-2xl border border-gt-border text-xs text-slate-400">
+                <span id="pagination-info">Menampilkan items 1 - 24</span>
+                <div class="flex items-center gap-2">
+                    <button id="btn-prev-page" onclick="changePage(-1)" class="px-3 py-1.5 bg-gt-dark hover:bg-gt-border rounded-lg text-slate-300 border border-gt-border disabled:opacity-50">Sebelumnya</button>
+                    <span id="current-page-num" class="font-mono text-emerald-400 font-bold px-2">Halaman 1</span>
+                    <button id="btn-next-page" onclick="changePage(1)" class="px-3 py-1.5 bg-gt-dark hover:bg-gt-border rounded-lg text-slate-300 border border-gt-border disabled:opacity-50">Selanjutnya</button>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="no-results" class="hidden text-center py-12 bg-gt-card rounded-2xl border border-gt-border">
+                <svg class="w-12 h-12 text-slate-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="text-sm font-semibold text-slate-300">Tidak ada item yang ditemukan</h3>
+                <p class="text-xs text-slate-500 mt-1">Coba sesuaikan kata kunci pencarian atau ubah filter kategori.</p>
+            </div>
+        </section>
+
+        <!-- TAB 3: DIFF & COMPARE TOOL -->
+        <section id="tab-diff" class="hidden space-y-6">
+            <div class="bg-gt-card p-6 rounded-2xl border border-gt-border space-y-4 shadow-xl">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        ⚔️ Pembanding Versi items.dat (Diff Engine)
+                    </h2>
+                    <p class="text-xs text-slate-400">Bandingkan 2 file `items.dat` berbeda atau bandingkan snapshot lama vs hasil sync CDN terbaru untuk melacak item yang baru ditambahkan.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- File 1: Old -->
+                    <div class="border-2 border-dashed border-gt-border hover:border-slate-400 p-5 rounded-2xl bg-gt-dark/50 text-center cursor-pointer transition" onclick="document.getElementById('diff-old-input').click()">
+                        <input type="file" id="diff-old-input" onchange="handleDiffUpload('old', event)" accept=".dat" class="hidden">
+                        <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <h4 class="text-xs font-bold text-slate-300" id="diff-old-title">1. File items.dat Versi LAMA</h4>
+                        <p class="text-[11px] text-slate-500 mt-1" id="diff-old-desc">Klik atau Drag & Drop file items.dat terdahulu</p>
+                    </div>
+
+                    <!-- File 2: New -->
+                    <div class="border-2 border-dashed border-emerald-500/30 hover:border-emerald-500 p-5 rounded-2xl bg-gt-dark/50 text-center cursor-pointer transition" onclick="document.getElementById('diff-new-input').click()">
+                        <input type="file" id="diff-new-input" onchange="handleDiffUpload('new', event)" accept=".dat" class="hidden">
+                        <svg class="w-8 h-8 text-emerald-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <h4 class="text-xs font-bold text-emerald-300" id="diff-new-title">2. File items.dat Versi BARU</h4>
+                        <p class="text-[11px] text-slate-500 mt-1" id="diff-new-desc">Klik atau Drag & Drop file items.dat terbaru</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button onclick="useCurrentDatabaseAsNewDiff()" class="text-xs text-cyan-400 hover:underline">
+                        🔄 Gunakan Database Aktif Saat Ini
+                    </button>
+                    <button onclick="runDiffAnalysis()" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
+                        🔍 Jalankan Analisis Perbedaan (Diff)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Diff Results Display -->
+            <div id="diff-results" class="bg-gt-card rounded-2xl border border-gt-border p-6 space-y-6 shadow-xl">
+                <div class="flex items-center justify-between border-b border-gt-border pb-4">
+                    <h3 class="font-bold text-white text-sm">Hasil Ringkasan Perubahan File</h3>
+                    <div class="flex gap-2 text-xs font-mono">
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" id="diff-added-count">Item Baru: 0</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30" id="diff-modified-count">Diubah: 0</span>
+                    </div>
+                </div>
+
+                <!-- Added Items Section -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>🟢 Item Baru Ditambahkan (Added Items)</span>
+                    </h4>
+                    <div class="overflow-x-auto border border-gt-border rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gt-dark text-slate-400 border-b border-gt-border font-mono">
+                                <tr>
+                                    <th class="p-3">ID</th>
+                                    <th class="p-3">Nama Item</th>
+                                    <th class="p-3">Rarity</th>
+                                    <th class="p-3">Tipe Aksi</th>
+                                    <th class="p-3">Status Leak</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diff-added-table" class="divide-y divide-gt-border text-slate-200">
+                                <!-- Dynamic added items rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Modified Items Section -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                        <span>🟡 Stat / Nama Item Diubah (Modified Properties)</span>
+                    </h4>
+                    <div class="overflow-x-auto border border-gt-border rounded-xl">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gt-dark text-slate-400 border-b border-gt-border font-mono">
+                                <tr>
+                                    <th class="p-3">ID</th>
+                                    <th class="p-3">Item</th>
+                                    <th class="p-3">Properti Diubah</th>
+                                    <th class="p-3">Nilai Lama</th>
+                                    <th class="p-3">Nilai Baru</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diff-modified-table" class="divide-y divide-gt-border text-slate-200">
+                                <!-- Dynamic modified items rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: SOURCE SETTINGS, PROXY CONFIG & WATCHER -->
+        <section id="tab-settings" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Local File System Access Watcher Card -->
+                <div class="bg-gt-card p-6 rounded-2xl border border-gt-border space-y-4 shadow-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xl">
+                            👁️
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-sm">File System Watcher Live (PC Game Cache)</h3>
+                            <p class="text-xs text-slate-400">Hubungkan langsung ke file <code class="text-cyan-300 font-mono">items.dat</code> lokal di PC Anda.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gt-dark p-4 rounded-xl border border-gt-border space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Status File Watcher:</span>
+                            <span id="watcher-status-text" class="font-bold text-slate-500">Tidak Terhubung</span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs font-mono">
+                            <span class="text-slate-400">Terakhir Dimodifikasi:</span>
+                            <span id="watcher-last-modified" class="text-slate-300">-</span>
+                        </div>
+                        <button onclick="startFileWatcher()" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                            📂 Hubungkan File items.dat Lokal
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Custom Remote Proxy Feed Settings -->
+                <div class="bg-gt-card p-6 rounded-2xl border border-gt-border space-y-4 shadow-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xl">
+                            🌐
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-sm">Konfigurasi CDN Auto-Poll</h3>
+                            <p class="text-xs text-slate-400">Atur interval auto-refresh untuk mengecek rilis item baru dari server Ubisoft CDN.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block text-slate-300 mb-1 font-medium">Interval Auto Sync (Detik)</label>
+                            <select id="config-interval-select" onchange="updateRefreshIntervalSetting()" class="w-full bg-gt-dark text-slate-200 p-2.5 rounded-xl border border-gt-border focus:outline-none focus:border-emerald-500">
+                                <option value="15">15 Detik (Sangat Cepat)</option>
+                                <option value="30" selected>30 Detik (Standar Rekomendasi)</option>
+                                <option value="60">60 Detik (1 Menit)</option>
+                                <option value="300">300 Detik (5 Menit)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-300 mb-1 font-medium">Sumber Utama Data</label>
+                            <select id="config-source-select" onchange="updateFeedSourceSetting()" class="w-full bg-gt-dark text-slate-200 p-2.5 rounded-xl border border-gt-border focus:outline-none focus:border-emerald-500">
+                                <option value="proxy" selected>Official Ubisoft CDN (Proxy Tunnel / Worker)</option>
+                                <option value="local">Local PC File Watcher (items.dat)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manual File Drag & Drop Upload Area -->
+            <div class="bg-gt-card p-8 rounded-2xl border border-gt-border text-center relative space-y-4 shadow-xl">
+                <div id="drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)" class="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-gt-dark/60 p-8 rounded-2xl transition cursor-pointer">
+                    <input type="file" id="binary-file-input" onchange="handleFileSelect(event)" accept=".dat" class="hidden">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400 mb-4">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </div>
+                    <h3 class="text-base font-bold text-white">Unggah Manual File items.dat</h3>
+                    <p class="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                        Mendukung dekripsi instan binary Growtopia <code class="text-emerald-400 font-mono">items.dat</code> versi 1 s/d 21+.
+                    </p>
+                    <button onclick="document.getElementById('binary-file-input').click()" class="mt-4 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-md transition">
+                        Pilih File Dari Perangkat
+                    </button>
+                </div>
+            </div>
+
+            <!-- Indonesian Path Installation Guide -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Windows Guide -->
+                <div class="bg-gt-card p-6 rounded-2xl border border-gt-border space-y-3 shadow-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 font-bold text-sm">PC Windows</span>
+                        <h3 class="font-bold text-white text-sm">Lokasi items.dat di PC</h3>
+                    </div>
+                    <div class="bg-gt-dark p-3 rounded-xl border border-gt-border font-mono text-xs text-emerald-400 select-all overflow-x-auto">
+                        %LOCALAPPDATA%\Growtopia\cache\items.dat
+                    </div>
+                    <ol class="list-decimal list-inside text-xs text-slate-300 space-y-1 pl-1">
+                        <li>Tekan tombol <kbd class="px-1.5 py-0.5 bg-gt-border rounded text-[10px]">Win + R</kbd> di keyboard.</li>
+                        <li>Tempelkan path lokasi di atas lalu tekan **Enter**.</li>
+                    </ol>
+                </div>
+
+                <!-- Android Guide -->
+                <div class="bg-gt-card p-6 rounded-2xl border border-gt-border space-y-3 shadow-xl">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold text-sm">Android</span>
+                        <h3 class="font-bold text-white text-sm">Lokasi items.dat di Android</h3>
+                    </div>
+                    <div class="bg-gt-dark p-3 rounded-xl border border-gt-border font-mono text-xs text-emerald-400 select-all overflow-x-auto">
+                        Android/data/com.rtsoft.growtopia/files/cache/items.dat
+                    </div>
+                    <ol class="list-decimal list-inside text-xs text-slate-300 space-y-1 pl-1">
+                        <li>Buka aplikasi File Manager (ZArchiver).</li>
+                        <li>Buka folder <code class="text-cyan-400 font-mono">Android -> data -> com.rtsoft.growtopia -> files -> cache</code>.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gt-border bg-gt-card/40 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>GrowTem &copy; 2026. Tools Komunitas GT Indonesia.</p>
+            <p class="font-mono text-[11px] text-slate-600">Client-Side Parser Engine • Secure Local XOR Decoding</p>
+        </div>
+    </footer>
+
+    <!-- ITEM INSPECTOR DETAIL MODAL -->
+    <div id="item-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-gt-card border border-gt-border w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-gt-border flex justify-between items-center bg-gt-dark">
+                <div class="flex items-center gap-3">
+                    <div id="modal-item-icon" class="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold font-mono text-sm">
+                        #0
+                    </div>
+                    <div>
+                        <h3 id="modal-item-name" class="font-bold text-base text-white">Nama Item</h3>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span id="modal-item-id" class="text-slate-400 font-mono">ID: #0</span>
+                            <span id="modal-item-rarity-badge" class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">Rarity 0</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-gt-border transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-300">
+                <!-- Status Flag Banner if Upcoming -->
+                <div id="modal-upcoming-alert" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 flex items-center gap-2">
+                    <span class="text-base">⚡</span>
+                    <div>
+                        <span class="font-bold">Item Bocoran / Upcoming:</span>
+                        <span id="modal-upcoming-reason" class="ml-1 text-amber-200">Terdeteksi sebagai slot item unreleased.</span>
+                    </div>
+                </div>
+
+                <!-- Technical Properties Grid -->
+                <div>
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3 pb-1 border-b border-gt-border">Properti Binary items.dat</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border">
+                            <span class="text-slate-500 block text-[10px]">Action Type (Tipe Aksi)</span>
+                            <span id="modal-prop-action" class="font-mono text-emerald-400 font-semibold">0 (None)</span>
+                        </div>
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border">
+                            <span class="text-slate-500 block text-[10px]">Item Category</span>
+                            <span id="modal-prop-category" class="font-mono text-cyan-400 font-semibold">0</span>
+                        </div>
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border">
+                            <span class="text-slate-500 block text-[10px]">Editable Type</span>
+                            <span id="modal-prop-editable" class="font-mono text-slate-200">0</span>
+                        </div>
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border">
+                            <span class="text-slate-500 block text-[10px]">Break Hits (Pukul)</span>
+                            <span id="modal-prop-hits" class="font-mono text-amber-400 font-semibold">0 Hit</span>
+                        </div>
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border">
+                            <span class="text-slate-500 block text-[10px]">Grow Time (Tumbuh)</span>
+                            <span id="modal-prop-growtime" class="font-mono text-emerald-400 font-semibold">Instan</span>
+                        </div>
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border">
+                            <span class="text-slate-500 block text-[10px]">Max Hold Amount</span>
+                            <span id="modal-prop-maxamount" class="font-mono text-slate-200">200</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Texture & Spritesheet Info -->
+                <div>
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3 pb-1 border-b border-gt-border">Tekstur & Texture Hash</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border space-y-1">
+                            <span class="text-slate-500 text-[10px] block">File Spritesheet</span>
+                            <code id="modal-prop-texture" class="text-cyan-300 font-mono text-xs">items_page1.png</code>
+                            <div class="text-[10px] text-slate-400 mt-1">Koordinat Texture: X=<span id="modal-prop-texx" class="text-emerald-400 font-bold">0</span>, Y=<span id="modal-prop-texy" class="text-emerald-400 font-bold">0</span></div>
+                        </div>
+                        <div class="bg-gt-dark p-3 rounded-xl border border-gt-border space-y-1">
+                            <span class="text-slate-500 text-[10px] block">Extra File / Sound Audio</span>
+                            <code id="modal-prop-extrafile" class="text-purple-300 font-mono text-xs">None</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Raw JSON View -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Raw JSON Data Object</h4>
+                        <button onclick="copyModalJSON()" class="text-[11px] text-emerald-400 hover:underline">📋 Salin Data JSON</button>
+                    </div>
+                    <pre id="modal-json-view" class="bg-gt-dark p-3 rounded-xl border border-gt-border text-[11px] font-mono text-emerald-300 overflow-x-auto max-h-40 scrollbar-thin"></pre>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-gt-border bg-gt-dark flex justify-end">
+                <button onclick="closeModal()" class="px-5 py-2 text-xs bg-gt-border hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROXY SETUP CODE DRAWER / MODAL -->
+    <div id="proxy-script-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-gt-card border border-gt-border w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="p-4 border-b border-gt-border flex justify-between items-center bg-gt-dark">
+                <div class="flex items-center gap-2">
+                    <span class="p-2 bg-cyan-500/20 text-cyan-300 rounded-lg text-sm font-mono">🌐</span>
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Script Backend Proxy Cloudflare / Node.js</h3>
+                        <p class="text-[11px] text-slate-400">Salin kode proxy di bawah ini untuk menghubungkan web secara langsung ke server Ubisoft CDN.</p>
+                    </div>
+                </div>
+                <button onclick="closeProxyScriptModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-gt-border transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-300">
+                <!-- Quick Step-by-Step Guide Banner (Dari Awal Banget) -->
+                <div class="bg-gradient-to-r from-emerald-500/10 via-gt-dark to-cyan-500/10 p-4 rounded-xl border border-emerald-500/30 space-y-4">
+                    <h4 class="font-bold text-emerald-300 text-sm flex items-center gap-2">
+                        <span>🚀 Panduan Lengkap Proxy Dari Awal Banget (Anti Pusing)</span>
+                    </h4>
+
+                    <!-- Tahap 1 -->
+                    <div class="space-y-2 border-b border-gt-border pb-3">
+                        <p class="font-bold text-white text-xs">Tahap 1: Persiapan Awal (Cukup Dilakukan Sekali Saja)</p>
+                        <ol class="list-decimal list-inside space-y-2 text-xs text-slate-300">
+                            <li>
+                                Buka <strong>Command Prompt (CMD)</strong> di Windows, pastikan Node.js sudah terpasang dengan mengetik <code class="text-cyan-300 font-mono bg-gt-card px-1.5 py-0.5 rounded">node -v</code> *(jika belum ada, instal dulu dari <code class="text-slate-200 font-mono">nodejs.org</code>)*.
+                            </li>
+                            <li>
+                                Buat folder khusus <code class="text-cyan-300 font-mono">growtem-proxy</code> dan pasang paket yang dibutuhkan dengan menyalin & menjalankan perintah ini di CMD:
+                                <div class="mt-1 flex items-center justify-between bg-gt-card px-3 py-1.5 rounded-lg border border-gt-border font-mono text-emerald-400">
+                                    <span id="cmd-init-all">mkdir growtem-proxy && cd growtem-proxy && npm init -y && npm install express cors</span>
+                                    <button onclick="copyCodeSnippet('cmd-init-all')" class="text-[10px] px-2 py-0.5 bg-gt-border hover:bg-slate-700 text-slate-200 rounded transition shrink-0 ml-2">📋 Salin</button>
+                                </div>
+                            </li>
+                            <li>
+                                Ketik <code class="text-cyan-300 font-mono bg-gt-card px-1.5 py-0.5 rounded">notepad server.js</code> di CMD (klik <strong>Yes</strong> jika ditanya buat file baru), tempelkan kode <strong>2. Node.js Express Server</strong> di bawah ini, lalu simpan (<kbd class="px-1 py-0.5 bg-gt-border rounded text-[10px]">Ctrl + S</kbd>) dan tutup Notepad.
+                            </li>
+                        </ol>
+                    </div>
+
+                    <!-- Tahap 2 -->
+                    <div class="space-y-2">
+                        <p class="font-bold text-white text-xs">Tahap 2: Menjalankan Proxy (Setiap Kali Memantau Live CDN)</p>
+                        <ol class="list-decimal list-inside space-y-2 text-xs text-slate-300">
+                            <li>
+                                Di <strong>CMD Pertama</strong> (dalam folder <code class="text-cyan-300 font-mono">growtem-proxy</code>), jalankan server lokal lalu <strong>Minimize</strong> jendelanya:
+                                <div class="mt-1 flex items-center justify-between bg-gt-card px-3 py-1.5 rounded-lg border border-gt-border font-mono text-emerald-400">
+                                    <span id="cmd-step-1">cd growtem-proxy && node server.js</span>
+                                    <button onclick="copyCodeSnippet('cmd-step-1')" class="text-[10px] px-2 py-0.5 bg-gt-border hover:bg-slate-700 text-slate-200 rounded transition shrink-0 ml-2">📋 Salin</button>
+                                </div>
+                            </li>
+                            <li>
+                                Buka <strong>CMD Kedua</strong> (jendela CMD baru), jalankan terowongan HTTPS Cloudflare lalu <strong>Minimize</strong> jendelanya:
+                                <div class="mt-1 flex items-center justify-between bg-gt-card px-3 py-1.5 rounded-lg border border-gt-border font-mono text-cyan-400">
+                                    <span id="cmd-step-2">npx cloudflared tunnel --url http://localhost:3000</span>
+                                    <button onclick="copyCodeSnippet('cmd-step-2')" class="text-[10px] px-2 py-0.5 bg-gt-border hover:bg-slate-700 text-slate-200 rounded transition shrink-0 ml-2">📋 Salin</button>
+                                </div>
+                            </li>
+                            <li>
+                                Salin link acak <code class="text-amber-300 font-mono">https://...trycloudflare.com</code> yang muncul di CMD kedua, tempel ke kolom <strong>🌐 URL Proxy</strong> di bagian atas web, lalu klik <strong>Simpan & Hubungkan Proxy</strong> *(biarkan kedua CMD tetap terbuka)*.
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- Option 1: Cloudflare Worker -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                            <span>1. Cloudflare Worker Script (Gratis 24/7 di Cloud)</span>
+                        </h4>
+                        <button onclick="copyCodeSnippet('code-cf-worker')" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-semibold text-[11px] transition">
+                            📋 Salin Code Worker
+                        </button>
+                    </div>
+                    <pre id="code-cf-worker" class="bg-gt-dark p-4 rounded-xl border border-gt-border font-mono text-[11px] text-emerald-300 overflow-x-auto max-h-56">export default {
+  async fetch(request) {
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Expose-Headers": "X-GT-Meta, X-GT-Items-URL, Last-Modified",
+    };
+
+    if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+    try {
+      const endpoints = [
+        { url: "https://www.growtopia1.com/growtopia/server_data.php", method: "POST" },
+        { url: "https://www.growtopia2.com/growtopia/server_data.php", method: "POST" }
+      ];
+
+      let serverDataText = "";
+      for (const ep of endpoints) {
+        try {
+          const res = await fetch(ep.url, {
+            method: ep.method,
+            headers: {
+              "User-Agent": "UbiServices_SDK_2022.Release.9_PC64_ansi_static",
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "version=5.62&platform=0&protocol=215",
+          });
+          const txt = await res.text();
+          if (txt.includes("meta|")) {
+            serverDataText = txt;
+            break;
+          }
+        } catch (e) {}
+      }
+
+      const metaMatch = serverDataText.match(/meta\|([^\r\n]+)/);
+      const cdnMatch = serverDataText.match(/cdnurl\|([^\r\n]+)/);
+
+      if (!metaMatch) {
+        throw new Error("IP Cloudflare diblokir WAF Ubisoft. Gunakan Node.js Proxy di PC (Opsi 2) agar memakai IP rumah Anda!");
+      }
+
+      const meta = metaMatch[1].trim();
+      const cdnBase = cdnMatch ? `https://${cdnMatch[1].trim()}` : "https://ubistatic-a.akamaihd.net/0098";
+      const itemsDatUrl = `${cdnBase}/${meta}/cache/items.dat`;
+
+      const itemsRes = await fetch(itemsDatUrl, {
+        headers: { "User-Agent": "UbiServices_SDK_2022.Release.9_PC64_ansi_static" },
+      });
+
+      if (!itemsRes.ok) throw new Error("Gagal mengambil items.dat dari CDN");
+
+      const headers = new Headers(corsHeaders);
+      headers.set("Content-Type", "application/octet-stream");
+      headers.set("X-GT-Meta", meta);
+      headers.set("X-GT-Items-URL", itemsDatUrl);
+
+      return new Response(itemsRes.body, { status: 200, headers });
+    } catch (err) {
+      return new Response(JSON.stringify({ error: err.message }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+  },
+};</pre>
+                </div>
+
+                <!-- Option 2: Node.js Local Server -->
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-white text-sm flex items-center gap-2">
+                            <span>2. Node.js Express Server (Localhost / VPS)</span>
+                        </h4>
+                        <button onclick="copyCodeSnippet('code-nodejs')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-[11px] transition">
+                            📋 Salin Code Node.js
+                        </button>
+                    </div>
+                    <pre id="code-nodejs" class="bg-gt-dark p-4 rounded-xl border border-gt-border font-mono text-[11px] text-cyan-300 overflow-x-auto max-h-56">const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
+const path = require("path");
+const app = express();
+
+app.use(cors({ exposedHeaders: ["X-GT-Meta", "X-GT-Items-URL"] }));
+
+app.get(["/", "/items.dat"], async (req, res) => {
+  try {
+    const hosts = [
+      "https://www.growtopia1.com/growtopia/server_data.php",
+      "https://www.growtopia2.com/growtopia/server_data.php"
+    ];
+
+    let meta = null;
+    let cdnBase = "https://ubistatic-a.akamaihd.net/0098";
+
+    for (const url of hosts) {
+      try {
+        const serverDataRes = await fetch(url, {
+          method: "POST",
+          headers: {
+            "User-Agent": "UbiServices_SDK_2022.Release.9_PC64_ansi_static",
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: "version=5.90&platform=0&protocol=225",
+        });
+        const txt = await serverDataRes.text();
+        const mMatch = txt.match(/meta\|([^\r\n]+)/);
+        const cMatch = txt.match(/cdnurl\|([^\r\n]+)/);
+        if (mMatch) {
+          meta = mMatch[1].trim();
+          if (cMatch) cdnBase = `https://${cMatch[1].trim()}`;
+          break;
+        }
+      } catch (e) {}
+    }
+
+    if (meta) {
+      const itemsDatUrl = `${cdnBase}/${meta}/cache/items.dat`;
+      const itemsRes = await fetch(itemsDatUrl, {
+        headers: { "User-Agent": "UbiServices_SDK_2022.Release.9_PC64_ansi_static" }
+      });
+      if (itemsRes.ok) {
+        const buffer = Buffer.from(await itemsRes.arrayBuffer());
+        res.set({
+          "Content-Type": "application/octet-stream",
+          "X-GT-Meta": meta,
+          "X-GT-Items-URL": itemsDatUrl,
+        });
+        return res.send(buffer);
+      }
+    }
+
+    // Fallback otomatis ke cache lokal Growtopia jika server_data.php sedang maintenance
+    const localCache = path.join(process.env.LOCALAPPDATA || "", "Growtopia", "cache", "items.dat");
+    if (fs.existsSync(localCache)) {
+      const buffer = fs.readFileSync(localCache);
+      res.set({
+        "Content-Type": "application/octet-stream",
+        "X-GT-Meta": "Local-PC-Cache",
+      });
+      return res.send(buffer);
+    }
+
+    throw new Error("Server Growtopia tidak merespons parameter meta dan cache lokal tidak ditemukan.");
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(3000, () => console.log("Proxy berjalan di http://localhost:3000/items.dat"));</pre>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gt-border bg-gt-dark flex justify-end">
+                <button onclick="closeProxyScriptModal()" class="px-5 py-2 text-xs bg-gt-border hover:bg-slate-700 text-slate-200 font-semibold rounded-xl transition">Tutup Modal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT CORE APPLICATION LOGIC -->
+    <script>
+        // Growtopia XOR Decryption Key
+        const GT_SECRET_KEY = "PBG892FXX982ABC*";
+
+        // Application State
+        let itemsDatabase = [];
+        let upcomingDatabase = [];
+        let previousSnapshot = [];
+        let newlyAddedIds = new Set();
+        let activeCategory = 'all';
+
+        // Pagination State
+        let currentPage = 1;
+        const itemsPerPage = 24;
+
+        // Proxy & Auto Refresh State
+        let proxyUrl = localStorage.getItem('gt_proxy_url') || '';
+        let currentCdnMeta = null;
+        let currentDatVersion = null;
+        let autoRefreshEnabled = true;
+        let autoRefreshIntervalSec = 30;
+        let autoRefreshTimer = null;
+        let autoRefreshCountdown = 30;
+        let feedSource = 'proxy';
+        let searchDebounceTimer = null;
+
+        // Local File Watcher State
+        let localFileHandle = null;
+        let lastFileModifiedTime = 0;
+
+        // Diff Storage
+        let oldDiffItems = [];
+        let newDiffItems = [];
+
+        // IndexedDB Helper untuk Menyimpan Cache Database Asli di Browser
+        const IDB_NAME = 'GrowTemCacheDB';
+        const IDB_STORE = 'itemsStore';
+
+        function openCacheDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(IDB_NAME, 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(IDB_STORE)) {
+                        db.createObjectStore(IDB_STORE);
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveItemsToCache(items, meta, version) {
+            try {
+                const db = await openCacheDB();
+                const tx = db.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).put({ items, meta, version, savedAt: Date.now() }, 'latest_cdn_snapshot');
+                const cacheEl = document.getElementById('telemetry-cache-status');
+                if (cacheEl) {
+                    cacheEl.innerText = `Tersimpan (${items.length})`;
+                    cacheEl.className = "text-xs font-bold font-mono text-emerald-400";
+                }
+            } catch (e) {
+                console.warn("Gagal menyimpan cache IndexedDB:", e);
+            }
+        }
+
+        async function loadItemsFromCache() {
+            try {
+                const db = await openCacheDB();
+                return new Promise((resolve) => {
+                    const tx = db.transaction(IDB_STORE, 'readonly');
+                    const req = tx.objectStore(IDB_STORE).get('latest_cdn_snapshot');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // Helper Salin Teks Aman untuk Iframe & Browser Modern
+        function copyTextSafe(text, successTitle, successMsg) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(successTitle, successMsg, "success");
+            } catch (err) {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => showToast(successTitle, successMsg, "success"));
+                }
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // Initialize App (Langsung Mode Official CDN / Database Asli Tanpa Data Demo)
+        window.onload = async function() {
+            document.getElementById('config-source-select').value = 'proxy';
+            if (proxyUrl) {
+                document.getElementById('proxy-url-input').value = proxyUrl;
+            }
+
+            // Muat snapshot database asli terakhir dari IndexedDB agar instan tampil
+            const cached = await loadItemsFromCache();
+            if (cached && Array.isArray(cached.items) && cached.items.length > 0) {
+                itemsDatabase = cached.items;
+                currentCdnMeta = cached.meta || null;
+                currentDatVersion = cached.version || null;
+                processUpcomingAndLeaks();
+                updateUIStats();
+                renderUpcomingList();
+                renderExplorerGrid();
+
+                const cacheEl = document.getElementById('telemetry-cache-status');
+                if (cacheEl) {
+                    cacheEl.innerText = `Aktif (${itemsDatabase.length})`;
+                    cacheEl.className = "text-xs font-bold font-mono text-cyan-400";
+                }
+                if (currentCdnMeta) {
+                    const metaBadge = document.getElementById('cdn-meta-badge');
+                    metaBadge.innerText = `Meta: ${currentCdnMeta}`;
+                    metaBadge.classList.remove('hidden');
+                }
+            } else {
+                loadInitialDatabase();
+            }
+
+            initAutoRefreshTimer();
+
+            // Otomatis tarik data asli terbaru dari CDN jika URL Proxy sudah tersimpan
+            if (proxyUrl) {
+                fetchProxyItemsDat(false);
+            }
+        };
+
+        function loadInitialDatabase() {
+            itemsDatabase = [];
+            upcomingDatabase = [];
+            updateUIStats();
+            renderUpcomingList();
+            renderExplorerGrid();
+        }
+
+        // Tab Navigation
+        function switchTab(tabId) {
+            ['upcoming', 'explorer', 'diff', 'settings'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                
+                const btn = document.getElementById(`nav-${t}`);
+                if (btn) {
+                    if (t === tabId) {
+                        btn.className = "tab-btn px-4 py-2 rounded-lg text-emerald-400 bg-gt-card border border-emerald-500/30 transition flex items-center gap-1.5 font-bold";
+                    } else {
+                        btn.className = "tab-btn px-4 py-2 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5 font-normal";
+                    }
+                }
+
+                const mobBtn = document.getElementById(`mob-nav-${t}`);
+                if (mobBtn) {
+                    if (t === tabId) {
+                        mobBtn.className = "mob-tab-btn whitespace-nowrap px-3 py-1.5 rounded bg-gt-card text-emerald-400 border border-emerald-500/30 font-bold";
+                    } else {
+                        mobBtn.className = "mob-tab-btn whitespace-nowrap px-3 py-1.5 rounded text-slate-400";
+                    }
+                }
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+        }
+
+        // Heuristic Leaks Processing
+        function processUpcomingAndLeaks() {
+            upcomingDatabase = [];
+            const highestIdThreshold = itemsDatabase.length > 0 ? Math.max(...itemsDatabase.map(i => i.id)) - 25 : 16490;
+
+            itemsDatabase.forEach(item => {
+                const isHighId = item.id >= highestIdThreshold;
+                const isNull = item.name.toLowerCase().startsWith('null_item') || item.name.toLowerCase().includes('unreleased') || item.name.toLowerCase().includes('wip');
+                const isIotm = item.name.toLowerCase().includes('iotm');
+
+                if (item.isUpcoming || isHighId || isNull || isIotm) {
+                    item.isUpcoming = true;
+                    if (!item.upcomingReason) {
+                        if (isIotm) item.upcomingReason = "Candidate Item of the Month (IoTM)";
+                        else if (isNull) item.upcomingReason = "Placeholder Name / Slot Kosong GT Server";
+                        else item.upcomingReason = "High Item ID Range Update Terbaru";
+                    }
+                    upcomingDatabase.push(item);
+                }
+            });
+
+            upcomingDatabase.sort((a, b) => b.id - a.id);
+        }
+
+        function getActionTypeName(type) {
+            const types = {
+                0: "None / Hiasan",
+                1: "Blok Solid",
+                2: "Benih / Seed",
+                3: "Pintu / Door",
+                8: "Lock / Kunci",
+                15: "Consumable / Makanan",
+                20: "Pakaian / Wings",
+                25: "Pet / Hewan",
+                26: "Mesin / Storage"
+            };
+            return types[type] || `Action #${type}`;
+        }
+
+        // Stats Updates
+        function updateUIStats() {
+            const totalItemsEl = document.getElementById('stat-total-items');
+            if (totalItemsEl) totalItemsEl.innerText = itemsDatabase.length;
+
+            const telTotal = document.getElementById('telemetry-total-items');
+            if (telTotal) telTotal.innerText = `${itemsDatabase.length.toLocaleString('id-ID')} Item`;
+
+            const telVer = document.getElementById('telemetry-dat-version');
+            if (telVer && currentDatVersion) telVer.innerText = `v${currentDatVersion}`;
+
+            const badgeUpcoming = document.getElementById('badge-upcoming-count');
+            if (badgeUpcoming) badgeUpcoming.innerText = upcomingDatabase.length;
+
+            const badgeTotal = document.getElementById('badge-total-count');
+            if (badgeTotal) badgeTotal.innerText = itemsDatabase.length;
+
+            if (newlyAddedIds.size > 0) {
+                const diffBadge = document.getElementById('badge-new-diff-count');
+                if (diffBadge) diffBadge.classList.remove('hidden');
+            }
+
+            if (upcomingDatabase.length > 0) {
+                const minId = Math.min(...upcomingDatabase.map(i => i.id));
+                const maxId = Math.max(...upcomingDatabase.map(i => i.id));
+                const rangeEl = document.getElementById('stat-upcoming-range');
+                if (rangeEl) rangeEl.innerText = `#${minId} - #${maxId}`;
+
+                const totalUpcomingEl = document.getElementById('stat-upcoming-total');
+                if (totalUpcomingEl) totalUpcomingEl.innerText = `${upcomingDatabase.length} Item`;
+
+                const iotmItem = upcomingDatabase.find(i => i.name.includes("IoTM"));
+                const iotmEl = document.getElementById('stat-iotm-name');
+                if (iotmItem && iotmEl) {
+                    iotmEl.innerText = iotmItem.name;
+                }
+            }
+        }
+
+        // Render Leaks List
+        function renderUpcomingList() {
+            const list = document.getElementById('upcoming-items-list');
+            list.innerHTML = '';
+
+            if (upcomingDatabase.length === 0) {
+                const emptyMsg = itemsDatabase.length === 0
+                    ? `Belum ada data database CDN yang dimuat. Tempelkan URL Proxy Cloudflare Tunnel (<code class="text-cyan-400 font-mono">https://...trycloudflare.com/items.dat</code>) di kolom atas lalu klik <strong>Simpan & Hubungkan Proxy</strong>.`
+                    : `Tidak ada bocoran item upcoming baru terdeteksi pada versi CDN saat ini.`;
+                list.innerHTML = `<div class="p-8 text-center text-xs text-slate-400 leading-relaxed">${emptyMsg}</div>`;
+                return;
+            }
+
+            upcomingDatabase.forEach(item => {
+                const isNewBadge = newlyAddedIds.has(item.id) 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold font-mono animate-pulse">NEW DETECTED</span>`
+                    : '';
+
+                const html = `
+                    <div class="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-gt-dark/60 transition group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-mono font-bold text-xs shrink-0 group-hover:border-amber-400 transition">
+                                #${item.id}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-bold text-sm text-white group-hover:text-amber-300 transition">${item.name}</h4>
+                                    ${isNewBadge}
+                                    <span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono">Unreleased</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                                    <span>📌 Deteksi:</span>
+                                    <span class="text-slate-300 font-medium">${item.upcomingReason || 'Bocoran ID Baru'}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 w-full sm:w-auto justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-gt-border">
+                            <div class="text-right text-xs">
+                                <span class="text-slate-500 block text-[10px]">Tipe / Rarity</span>
+                                <span class="text-slate-300 font-medium">${getActionTypeName(item.actionType)} • Rarity ${item.rarity}</span>
+                            </div>
+                            <button onclick="openModal(${item.id})" class="px-3 py-1.5 text-xs bg-gt-dark hover:bg-gt-border text-emerald-400 rounded-lg border border-gt-border transition font-semibold">
+                                Inspect Data
+                            </button>
+                        </div>
+                    </div>
+                `;
+                list.innerHTML += html;
+            });
+        }
+
+        // Render Explorer Grid with Pagination & Filtering
+        function renderExplorerGrid() {
+            const grid = document.getElementById('items-grid');
+            const noRes = document.getElementById('no-results');
+            grid.innerHTML = '';
+
+            const searchInput = document.getElementById('search-input');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const clearBtn = document.getElementById('btn-clear-search');
+            if (clearBtn) {
+                if (searchTerm.length > 0) clearBtn.classList.remove('hidden');
+                else clearBtn.classList.add('hidden');
+            }
+            const sortMode = document.getElementById('sort-select').value;
+
+            let filtered = itemsDatabase.filter(item => {
+                let matchSearch = true;
+                if (searchTerm) {
+                    if (searchTerm.startsWith('#')) {
+                        const exactId = searchTerm.slice(1);
+                        matchSearch = item.id.toString() === exactId || item.id.toString().startsWith(exactId);
+                    } else {
+                        matchSearch = item.name.toLowerCase().includes(searchTerm) || item.id.toString().includes(searchTerm);
+                    }
+                }
+                if (!matchSearch) return false;
+
+                if (activeCategory === 'upcoming') return item.isUpcoming;
+                if (activeCategory === 'new') return newlyAddedIds.has(item.id);
+                if (activeCategory === 'clothing') return item.actionType === 20;
+                if (activeCategory === 'locks') return item.actionType === 8 || item.actionType === 3;
+                if (activeCategory === 'blocks') return item.actionType === 1;
+                if (activeCategory === 'seeds') return item.actionType === 2;
+
+                return true;
+            });
+
+            filtered.sort((a, b) => {
+                if (sortMode === 'id-asc') return a.id - b.id;
+                if (sortMode === 'id-desc') return b.id - a.id;
+                if (sortMode === 'rarity-desc') return b.rarity - a.rarity;
+                if (sortMode === 'name-asc') return a.name.localeCompare(b.name);
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                noRes.classList.remove('hidden');
+                document.getElementById('pagination-bar').classList.add('hidden');
+                return;
+            } else {
+                noRes.classList.add('hidden');
+                document.getElementById('pagination-bar').classList.remove('hidden');
+            }
+
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filtered.length);
+            const pageItems = filtered.slice(startIndex, endIndex);
+
+            document.getElementById('pagination-info').innerText = `Menampilkan items ${startIndex + 1} - ${endIndex} dari total ${filtered.length}`;
+            document.getElementById('current-page-num').innerText = `Halaman ${currentPage} / ${totalPages}`;
+            document.getElementById('btn-prev-page').disabled = currentPage === 1;
+            document.getElementById('btn-next-page').disabled = currentPage === totalPages;
+
+            pageItems.forEach(item => {
+                const isNewBadge = newlyAddedIds.has(item.id)
+                    ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">NEW</span>`
+                    : '';
+
+                const isUpcomingBadge = item.isUpcoming 
+                    ? `<span class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">⚡ Leak</span>` 
+                    : '';
+
+                const cardHtml = `
+                    <div class="bg-gt-card border border-gt-border hover:border-emerald-500/50 rounded-2xl p-4 transition group flex flex-col justify-between relative overflow-hidden shadow-lg">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="font-mono text-xs font-bold text-slate-400 bg-gt-dark px-2.5 py-1 rounded-lg border border-gt-border">#${item.id}</span>
+                                <div class="flex items-center gap-1">
+                                    ${isNewBadge}
+                                    ${isUpcomingBadge}
+                                    <span class="px-2 py-0.5 text-[10px] rounded bg-gt-dark text-slate-300 border border-gt-border font-mono">Rarity ${item.rarity}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-3 mb-3">
+                                <div class="w-12 h-12 rounded-xl bg-gt-dark border border-gt-border flex items-center justify-center font-bold text-emerald-400 font-mono text-sm shrink-0 group-hover:border-emerald-500/40 transition">
+                                    ${item.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white group-hover:text-emerald-400 transition line-clamp-1">${item.name}</h3>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">${getActionTypeName(item.actionType)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-gt-border flex items-center justify-between text-[11px] text-slate-400 mt-2">
+                            <span class="truncate max-w-[110px]">Tex: ${item.texture || 'page1.png'}</span>
+                            <button onclick="openModal(${item.id})" class="text-emerald-400 hover:text-emerald-300 font-semibold hover:underline flex items-center gap-1">
+                                Inspect
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHtml;
+            });
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            renderExplorerGrid();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setCategoryFilter(cat) {
+            activeCategory = cat;
+            currentPage = 1;
+            document.querySelectorAll('.cat-pill').forEach(btn => {
+                if (btn.getAttribute('data-cat') === cat) {
+                    btn.className = "cat-pill px-3 py-1.5 text-xs rounded-lg bg-emerald-600 text-white font-medium transition";
+                } else {
+                    btn.className = "cat-pill px-3 py-1.5 text-xs rounded-lg bg-gt-dark text-slate-300 hover:text-white border border-gt-border transition";
+                }
+            });
+            renderExplorerGrid();
+        }
+
+        function applyExplorerFilters() {
+            currentPage = 1;
+            renderExplorerGrid();
+        }
+
+        function debouncedExplorerSearch() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                applyExplorerFilters();
+            }, 150);
+        }
+
+        function clearExplorerSearch() {
+            document.getElementById('search-input').value = '';
+            applyExplorerFilters();
+        }
+
+        // PROXY URL CONNECTION & LIVE SYNC
+        async function saveAndConnectProxy() {
+            const btn = document.getElementById('btn-save-proxy');
+            let inputVal = document.getElementById('proxy-url-input').value.trim();
+
+            if (!inputVal) {
+                showToast("URL Proxy Kosong", "Masukkan URL Proxy Cloudflare Tunnel / Node.js terlebih dahulu.", "error");
+                return;
+            }
+
+            // Ekstrak URL valid jika user tidak sengaja menyalin teks pengantar dari terminal
+            const urlExtract = inputVal.match(/(https?:\/\/[^\s]+)/i);
+            if (urlExtract) {
+                inputVal = urlExtract[1];
+            } else if (!inputVal.startsWith('http://') && !inputVal.startsWith('https://')) {
+                inputVal = 'https://' + inputVal;
+            }
+            // Otomatis tambahkan /items.dat jika memakai domain trycloudflare.com tanpa path
+            if (inputVal.includes('trycloudflare.com') && !inputVal.endsWith('/items.dat')) {
+                inputVal = inputVal.replace(/\/+$/, '') + '/items.dat';
+            }
+            document.getElementById('proxy-url-input').value = inputVal;
+
+            proxyUrl = inputVal;
+            localStorage.setItem('gt_proxy_url', proxyUrl);
+            feedSource = 'proxy';
+            document.getElementById('config-source-select').value = 'proxy';
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<span class="animate-spin">⏳</span> <span>Menghubungkan...</span>`;
+            }
+            
+            await fetchProxyItemsDat(true);
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg><span>Simpan & Hubungkan Proxy</span>`;
+            }
+        }
+
+        async function fetchProxyItemsDat(isManual = false) {
+            if (!proxyUrl) {
+                if (isManual) showToast("Proxy Belum Diatur", "Silakan masukkan URL Proxy terlebih dahulu.", "error");
+                return;
+            }
+
+            const spinner = document.getElementById('sync-spinner');
+            if (spinner) spinner.classList.add('animate-spin');
+
+            try {
+                let response = null;
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    try {
+                        response = await fetch(proxyUrl, { cache: "no-store" });
+                        break;
+                    } catch (netErr) {
+                        if (attempt === 1) throw netErr;
+                        await new Promise(r => setTimeout(r, 2000));
+                    }
+                }
+                if (!response.ok) {
+                    let detailErr = `HTTP Error ${response.status}`;
+                    try {
+                        const errJson = await response.json();
+                        if (errJson.error) detailErr = errJson.error;
+                    } catch (e) {}
+                    throw new Error(detailErr);
+                }
+
+                const latestMeta = response.headers.get('X-GT-Meta') || 'Live-CDN';
+                const arrayBuffer = await response.arrayBuffer();
+
+                // Update Header Status
+                document.getElementById('header-source-tag').innerText = "Official CDN";
+                document.getElementById('header-source-tag').className = "text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold";
+                
+                document.getElementById('proxy-status-icon-bg').className = "p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                document.getElementById('live-indicator-dot').className = "absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-gt-card animate-ping";
+                document.getElementById('db-status-title').innerText = "Official Ubisoft CDN: Terhubung Live";
+                document.getElementById('db-status-desc').innerText = `Tersinkronisasi otomatis dengan server Ubisoft CDN melalui ${proxyUrl}`;
+
+                const metaBadge = document.getElementById('cdn-meta-badge');
+                metaBadge.innerText = `Meta: ${latestMeta}`;
+                metaBadge.classList.remove('hidden');
+
+                if (latestMeta !== currentCdnMeta || isManual || itemsDatabase.length === 0) {
+                    const parsed = parseBinaryItemsDat(arrayBuffer);
+                    if (parsed && parsed.items.length > 0) {
+                        const isFirstRealSync = currentCdnMeta === null && itemsDatabase.length === 0;
+                        previousSnapshot = isFirstRealSync ? [] : itemsDatabase;
+                        itemsDatabase = parsed.items;
+                        currentDatVersion = parsed.version;
+
+                        newlyAddedIds.clear();
+                        if (!isFirstRealSync && previousSnapshot.length > 0) {
+                            const prevMap = new Set(previousSnapshot.map(i => i.id));
+                            itemsDatabase.forEach(i => {
+                                if (!prevMap.has(i.id)) newlyAddedIds.add(i.id);
+                            });
+                        }
+
+                        currentCdnMeta = latestMeta;
+                        const lastSyncEl = document.getElementById('telemetry-last-sync');
+                        if (lastSyncEl) lastSyncEl.innerText = new Date().toLocaleTimeString('id-ID');
+
+                        saveItemsToCache(itemsDatabase, currentCdnMeta, currentDatVersion);
+                        processUpcomingAndLeaks();
+                        updateUIStats();
+                        renderUpcomingList();
+                        renderExplorerGrid();
+
+                        if (newlyAddedIds.size > 0) {
+                            showToast("⚡ Item Baru Ditemukan!", `${newlyAddedIds.size} item baru masuk dari Ubisoft CDN (Meta: ${latestMeta})`, "leak");
+                            playAlertSound();
+                        } else if (isManual) {
+                            showToast("Sinkronisasi Berhasil", `Memuat ${itemsDatabase.length} item terbaru (Meta: ${latestMeta}).`, "success");
+                        }
+                    } else {
+                        throw new Error("Format file items.dat tidak valid");
+                    }
+                } else {
+                    const lastSyncEl = document.getElementById('telemetry-last-sync');
+                    if (lastSyncEl) lastSyncEl.innerText = new Date().toLocaleTimeString('id-ID');
+                }
+            } catch (err) {
+                console.error("Proxy Fetch Error:", err);
+                document.getElementById('db-status-title').innerText = "Proxy Sync: Gagal Terhubung";
+                document.getElementById('db-status-desc').innerText = `Error: ${err.message}. Pastikan URL Proxy aktif dan mendukung CORS.`;
+                if (isManual) {
+                    showToast("Koneksi Proxy Gagal", `Gagal mengambil data dari ${proxyUrl} (${err.message})`, "error");
+                }
+            } finally {
+                if (spinner) spinner.classList.remove('animate-spin');
+            }
+        }
+
+        // BINARY ITEMS.DAT PARSER ENGINE (Self-Synchronizing for v11 up to v25+ / 16518+ Items)
+        function parseBinaryItemsDat(arrayBuffer) {
+            const dataView = new DataView(arrayBuffer);
+            const totalBytes = arrayBuffer.byteLength;
+            let offset = 0;
+
+            const readString = (pos) => {
+                if (pos + 2 > totalBytes) return { str: "", nextPos: totalBytes };
+                const len = dataView.getUint16(pos, true);
+                pos += 2;
+                if (len > 1024 || pos + len > totalBytes) return { str: "", nextPos: pos };
+                let str = "";
+                for (let j = 0; j < len; j++) {
+                    const code = dataView.getUint8(pos + j);
+                    if (code >= 32 && code <= 126) {
+                        str += String.fromCharCode(code);
+                    }
+                }
+                return { str, nextPos: pos + len };
+            };
+
+            const decryptXorName = (pos, len, itemId, version) => {
+                let decrypted = "";
+                for (let c = 0; c < len; c++) {
+                    let charCode = dataView.getUint8(pos + c);
+                    if (version >= 11) {
+                        const keyChar = GT_SECRET_KEY.charCodeAt((c + itemId) % GT_SECRET_KEY.length);
+                        charCode = charCode ^ keyChar;
+                    }
+                    if (charCode >= 32 && charCode <= 126) {
+                        decrypted += String.fromCharCode(charCode);
+                    }
+                }
+                return decrypted;
+            };
+
+            try {
+                if (totalBytes < 6) return null;
+                const version = dataView.getUint16(offset, true); offset += 2;
+                const itemCount = dataView.getUint32(offset, true); offset += 4;
+
+                if (itemCount <= 0 || itemCount > 100000) {
+                    throw new Error("Jumlah item tidak valid");
+                }
+
+                const parsedItems = [];
+
+                for (let i = 0; i < itemCount; i++) {
+                    if (offset + 12 >= totalBytes) break;
+
+                    // SELF-SYNC ANCHOR: Di items.dat GT, item ke-i selalu memiliki ID == i
+                    if (dataView.getInt32(offset, true) !== i) {
+                        let foundSync = false;
+                        const maxSearch = Math.min(totalBytes - 12, offset + 4096);
+                        for (let scan = Math.max(6, offset - 32); scan < maxSearch; scan++) {
+                            if (dataView.getInt32(scan, true) === i) {
+                                const candidateNameLen = dataView.getUint16(scan + 8, true);
+                                if (candidateNameLen > 0 && candidateNameLen < 120 && scan + 10 + candidateNameLen < totalBytes) {
+                                    const testName = decryptXorName(scan + 10, candidateNameLen, i, version);
+                                    if (testName.length === candidateNameLen) {
+                                        offset = scan;
+                                        foundSync = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (!foundSync) continue;
+                    }
+
+                    const item = {};
+                    item.id = dataView.getInt32(offset, true); offset += 4;
+                    item.editableType = dataView.getUint8(offset); offset += 1;
+                    item.category = dataView.getUint8(offset); offset += 1;
+                    item.actionType = dataView.getUint8(offset); offset += 1;
+                    item.hitSoundType = dataView.getUint8(offset); offset += 1;
+
+                    // Decrypt XOR Item Name
+                    const nameLen = dataView.getUint16(offset, true); offset += 2;
+                    if (nameLen > 256 || offset + nameLen > totalBytes) break;
+
+                    const decryptedName = decryptXorName(offset, nameLen, item.id, version);
+                    offset += nameLen;
+                    item.name = decryptedName || `null_item_${item.id}`;
+
+                    // Texture File String
+                    const texRes = readString(offset);
+                    item.texture = texRes.str;
+                    offset = texRes.nextPos;
+
+                    if (offset + 24 > totalBytes) {
+                        parsedItems.push(item);
+                        break;
+                    }
+
+                    item.textureHash = dataView.getInt32(offset, true); offset += 4;
+                    item.itemKind = dataView.getUint8(offset); offset += 1;
+                    item.val1 = dataView.getUint32(offset, true); offset += 4;
+                    item.textureX = dataView.getUint8(offset); offset += 1;
+                    item.textureY = dataView.getUint8(offset); offset += 1;
+                    item.spreadType = dataView.getUint8(offset); offset += 1;
+                    item.isStripes1 = dataView.getUint8(offset); offset += 1;
+                    item.collisionType = dataView.getUint8(offset); offset += 1;
+                    item.hits = Math.round(dataView.getUint8(offset) / 6); offset += 1;
+                    item.dropChance = dataView.getUint32(offset, true); offset += 4;
+                    item.clothingType = dataView.getUint8(offset); offset += 1;
+                    item.rarity = dataView.getInt16(offset, true); offset += 2;
+                    item.maxAmount = dataView.getUint8(offset); offset += 1;
+
+                    // Extra File
+                    const extraRes = readString(offset);
+                    item.extraFile = extraRes.str;
+                    offset = extraRes.nextPos;
+
+                    if (offset + 8 <= totalBytes) {
+                        item.extraFileHash = dataView.getInt32(offset, true); offset += 4;
+                        item.audioVolume = dataView.getInt32(offset, true); offset += 4;
+                    }
+
+                    // Pet strings
+                    offset = readString(offset).nextPos; // petName
+                    offset = readString(offset).nextPos; // petPrefix
+                    offset = readString(offset).nextPos; // petSuffix
+                    offset = readString(offset).nextPos; // petAbility
+
+                    // Seed & Tree properties
+                    if (offset + 24 <= totalBytes) {
+                        item.seedBase = dataView.getUint8(offset); offset += 1;
+                        item.seedOverlay = dataView.getUint8(offset); offset += 1;
+                        item.treeBase = dataView.getUint8(offset); offset += 1;
+                        item.treeLeaves = dataView.getUint8(offset); offset += 1;
+                        item.seedColor = dataView.getInt32(offset, true); offset += 4;
+                        item.seedOverlayColor = dataView.getInt32(offset, true); offset += 4;
+                        offset += 4; // deleted ingredients
+                        item.growTime = dataView.getInt32(offset, true); offset += 4;
+                        item.val2 = dataView.getInt16(offset, true); offset += 2;
+                        item.isRayman = dataView.getInt16(offset, true); offset += 2;
+                    }
+
+                    // Extra options & reserved bytes
+                    offset = readString(offset).nextPos; // extraOptions
+                    offset = readString(offset).nextPos; // texture2
+                    offset = readString(offset).nextPos; // extraOptions2
+                    offset += 80; // reserved bytes
+
+                    if (version >= 11) offset = readString(offset).nextPos; // punchOptions
+                    if (version >= 12) offset += 13;
+                    if (version >= 13) offset += 4;
+                    if (version >= 14) offset += 4;
+                    if (version >= 15) {
+                        offset += 25;
+                        offset = readString(offset).nextPos; // rendererFile
+                    }
+                    if (version >= 16) offset = readString(offset).nextPos; // itemInfo
+                    if (version >= 17) offset += 4;
+                    if (version >= 18) offset += 4;
+                    if (version >= 19) offset += 9;
+                    if (version >= 21) offset += 2;
+                    if (version >= 22) offset += 4;
+                    if (version >= 23) {
+                        offset += 4;
+                        offset = readString(offset).nextPos;
+                    }
+                    if (version >= 24) offset += 4;
+
+                    parsedItems.push(item);
+                }
+
+                return { version, itemCount, items: parsedItems };
+            } catch (err) {
+                console.error("Binary Parse Error:", err);
+                return null;
+            }
+        }
+
+        // Open Inspector Modal
+        function openModal(itemId) {
+            const item = itemsDatabase.find(i => i.id === itemId);
+            if (!item) return;
+
+            document.getElementById('modal-item-name').innerText = item.name;
+            document.getElementById('modal-item-id').innerText = `ID: #${item.id}`;
+            document.getElementById('modal-item-icon').innerText = `#${item.id}`;
+            document.getElementById('modal-item-rarity-badge').innerText = `Rarity ${item.rarity}`;
+            
+            document.getElementById('modal-prop-action').innerText = `${item.actionType} (${getActionTypeName(item.actionType)})`;
+            document.getElementById('modal-prop-category').innerText = item.category || 0;
+            document.getElementById('modal-prop-editable').innerText = item.editableType || 0;
+            document.getElementById('modal-prop-hits').innerText = `${item.hits || 1} Hit`;
+            
+            const growSeconds = item.growTime || 0;
+            if (growSeconds > 0) {
+                const days = Math.floor(growSeconds / 86400);
+                const hours = Math.floor((growSeconds % 86400) / 3600);
+                const mins = Math.floor((growSeconds % 3600) / 60);
+                const secs = growSeconds % 60;
+                document.getElementById('modal-prop-growtime').innerText = `${days > 0 ? days + 'd ' : ''}${hours}h ${mins}m ${secs}s`;
+            } else {
+                document.getElementById('modal-prop-growtime').innerText = "Instan / N/A";
+            }
+
+            document.getElementById('modal-prop-maxamount').innerText = item.maxAmount || 200;
+            document.getElementById('modal-prop-texture').innerText = item.texture || "items_page1.png";
+            document.getElementById('modal-prop-texx').innerText = item.textureX || 0;
+            document.getElementById('modal-prop-texy').innerText = item.textureY || 0;
+            document.getElementById('modal-prop-extrafile').innerText = item.extraFile || "None";
+
+            const upcomingAlert = document.getElementById('modal-upcoming-alert');
+            if (item.isUpcoming) {
+                upcomingAlert.classList.remove('hidden');
+                document.getElementById('modal-upcoming-reason').innerText = item.upcomingReason || "Terdeteksi sebagai slot item unreleased.";
+            } else {
+                upcomingAlert.classList.add('hidden');
+            }
+
+            document.getElementById('modal-json-view').innerText = JSON.stringify(item, null, 2);
+            document.getElementById('item-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('item-modal').classList.add('hidden');
+        }
+
+        function copyModalJSON() {
+            const text = document.getElementById('modal-json-view').innerText;
+            copyTextSafe(text, "Copied!", "Data JSON item disalin ke clipboard.");
+        }
+
+        // PROXY SCRIPT MODAL HELPERS
+        function openProxyScriptModal() {
+            document.getElementById('proxy-script-modal').classList.remove('hidden');
+        }
+
+        function closeProxyScriptModal() {
+            document.getElementById('proxy-script-modal').classList.add('hidden');
+        }
+
+        function copyCodeSnippet(elementId) {
+            const codeText = document.getElementById(elementId).innerText;
+            copyTextSafe(codeText, "Code Copied!", "Script proxy berhasil disalin ke clipboard.");
+        }
+
+        // AUTO REFRESH TIMER ENGINE
+        function initAutoRefreshTimer() {
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+
+            autoRefreshTimer = setInterval(() => {
+                if (!autoRefreshEnabled) return;
+
+                autoRefreshCountdown--;
+                const progressPct = (autoRefreshCountdown / autoRefreshIntervalSec) * 100;
+                document.getElementById('countdown-progress').style.width = `${progressPct}%`;
+
+                if (autoRefreshCountdown <= 0) {
+                    autoRefreshCountdown = autoRefreshIntervalSec;
+                    executeLiveSync();
+                }
+            }, 1000);
+        }
+
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = !autoRefreshEnabled;
+            const text = document.getElementById('autorefresh-status-text');
+            if (autoRefreshEnabled) {
+                text.innerText = `ON (${autoRefreshIntervalSec}s)`;
+                text.className = "font-bold text-emerald-400 hover:underline flex items-center gap-1";
+                showToast("Auto-Sync ON", `Radar akan memeriksa update setiap ${autoRefreshIntervalSec} detik.`, "info");
+            } else {
+                text.innerText = `OFF`;
+                text.className = "font-bold text-slate-400 hover:underline flex items-center gap-1";
+                showToast("Auto-Sync Paused", "Pembaruan otomatis dihentikan sementara.", "info");
+            }
+        }
+
+        function triggerManualSync() {
+            autoRefreshCountdown = autoRefreshIntervalSec;
+            executeLiveSync(true);
+        }
+
+        function executeLiveSync(isManual = false) {
+            if (feedSource === 'proxy' && proxyUrl) {
+                fetchProxyItemsDat(isManual);
+            } else if (feedSource === 'local' && localFileHandle) {
+                checkLocalFileUpdate();
+            } else if (isManual) {
+                showToast("Proxy Belum Terhubung", "Masukkan URL Proxy Cloudflare Tunnel / Node.js di kolom atas untuk menarik database Growtopia asli.", "error");
+            }
+        }
+
+        // LOCAL FILE WATCHER
+        async function startFileWatcher() {
+            const isCrossOriginIframe = window.self !== window.top;
+            if ('showOpenFilePicker' in window && !isCrossOriginIframe) {
+                try {
+                    const [handle] = await window.showOpenFilePicker({
+                        types: [{
+                            description: 'Growtopia items.dat File',
+                            accept: { 'application/octet-stream': ['.dat'] }
+                        }],
+                        multiple: false
+                    });
+
+                    localFileHandle = handle;
+                    feedSource = 'local';
+                    document.getElementById('config-source-select').value = 'local';
+                    
+                    const file = await handle.getFile();
+                    lastFileModifiedTime = file.lastModified;
+
+                    document.getElementById('watcher-status-text').innerText = `Terhubung (Live): ${file.name}`;
+                    document.getElementById('watcher-status-text').className = "font-bold text-cyan-400";
+                    document.getElementById('watcher-last-modified').innerText = new Date(file.lastModified).toLocaleTimeString();
+
+                    processUploadedFile(file);
+                    showToast("File Watcher Aktif", `Memantau perubahan file ${file.name} secara real-time.`, "success");
+                    return;
+                } catch (err) {
+                    if (err.name === 'AbortError') return;
+                    console.warn("showOpenFilePicker diblokir/gagal, beralih ke fallback file input:", err);
+                }
+            }
+
+            const fallbackInput = document.getElementById('binary-file-input');
+            if (fallbackInput) {
+                showToast("Membuka Pemilih File", "Silakan pilih file items.dat dari perangkat Anda.", "info");
+                fallbackInput.click();
+            }
+        }
+
+        async function checkLocalFileUpdate() {
+            if (!localFileHandle) return;
+
+            try {
+                const file = await localFileHandle.getFile();
+                if (file.lastModified > lastFileModifiedTime) {
+                    lastFileModifiedTime = file.lastModified;
+                    document.getElementById('watcher-last-modified').innerText = new Date(file.lastModified).toLocaleTimeString();
+                    
+                    processUploadedFile(file);
+                    showToast("items.dat Diperbarui!", `Perubahan file terdeteksi dan berhasil di-parse ulang.`, "success");
+                    playAlertSound();
+                }
+            } catch (err) {
+                console.error("Error reading watched file:", err);
+            }
+        }
+
+        // UPLOADER HANDLERS
+        function handleDragOver(e) { e.preventDefault(); }
+        function handleDragLeave(e) { e.preventDefault(); }
+        function handleFileDrop(e) {
+            e.preventDefault();
+            if (e.dataTransfer.files.length > 0) processUploadedFile(e.dataTransfer.files[0]);
+        }
+        function handleFileSelect(e) {
+            if (e.target.files.length > 0) processUploadedFile(e.target.files[0]);
+        }
+
+        function processUploadedFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const result = parseBinaryItemsDat(e.target.result);
+                if (result && result.items.length > 0) {
+                    previousSnapshot = itemsDatabase;
+                    itemsDatabase = result.items;
+                    currentDatVersion = result.version;
+
+                    const prevMap = new Set(previousSnapshot.map(i => i.id));
+                    newlyAddedIds.clear();
+                    itemsDatabase.forEach(i => {
+                        if (!prevMap.has(i.id)) newlyAddedIds.add(i.id);
+                    });
+
+                    const lastSyncEl = document.getElementById('telemetry-last-sync');
+                    if (lastSyncEl) lastSyncEl.innerText = new Date().toLocaleTimeString('id-ID');
+
+                    saveItemsToCache(itemsDatabase, `Local-v${result.version}`, currentDatVersion);
+                    processUpcomingAndLeaks();
+                    updateUIStats();
+                    renderUpcomingList();
+                    renderExplorerGrid();
+                    switchTab('upcoming');
+
+                    document.getElementById('watcher-status-text').innerText = `Dimuat: ${file.name}`;
+                    document.getElementById('watcher-status-text').className = "font-bold text-emerald-400";
+                    document.getElementById('watcher-last-modified').innerText = new Date(file.lastModified || Date.now()).toLocaleTimeString();
+
+                    document.getElementById('header-source-tag').innerText = "Local items.dat";
+                    document.getElementById('header-source-tag').className = "text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold";
+                    document.getElementById('db-status-title').innerText = `Local File Loaded: ${file.name}`;
+                    document.getElementById('db-status-desc').innerText = `Berhasil mendekripsi ${result.items.length} item (v${result.version}) langsung dari file game.`;
+
+                    showToast("Parse Sukses", `Berhasil mendekripsi ${result.items.length} item dari ${file.name}.`, "success");
+                } else {
+                    showToast("Gagal Parse File", "Pastikan file yang dipilih adalah items.dat asli Growtopia.", "error");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // DIFF / COMPARE ENGINE
+        function handleDiffUpload(type, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const res = parseBinaryItemsDat(e.target.result);
+                if (res) {
+                    if (type === 'old') {
+                        oldDiffItems = res.items;
+                        document.getElementById('diff-old-title').innerText = `1. ${file.name} (LAMA)`;
+                        document.getElementById('diff-old-desc').innerText = `Total ${res.items.length} Item`;
+                    } else {
+                        newDiffItems = res.items;
+                        document.getElementById('diff-new-title').innerText = `2. ${file.name} (BARU)`;
+                        document.getElementById('diff-new-desc').innerText = `Total ${res.items.length} Item`;
+                    }
+                    showToast("File Diff Dimuat", `File ${file.name} siap dibandingkan.`, "info");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function useCurrentDatabaseAsNewDiff() {
+            newDiffItems = JSON.parse(JSON.stringify(itemsDatabase));
+            document.getElementById('diff-new-title').innerText = `2. Database Aktif Current`;
+            document.getElementById('diff-new-desc').innerText = `Total ${newDiffItems.length} Item`;
+            showToast("Diff Ready", "Database aktif diset sebagai Versi BARU.", "info");
+        }
+
+        function runDiffAnalysis() {
+            if (oldDiffItems.length === 0) {
+                showToast("File Lama Kosong", "Silakan unggah file items.dat versi LAMA pada kotak nomor 1 terlebih dahulu.", "error");
+                return;
+            }
+            if (newDiffItems.length === 0) newDiffItems = itemsDatabase;
+            if (newDiffItems.length === 0) {
+                showToast("Database Baru Kosong", "Hubungkan Proxy CDN atau unggah file items.dat versi BARU terlebih dahulu.", "error");
+                return;
+            }
+
+            const oldMap = new Map(oldDiffItems.map(i => [i.id, i]));
+            const added = [];
+            const modified = [];
+
+            newDiffItems.forEach(newItem => {
+                if (!oldMap.has(newItem.id)) {
+                    added.push(newItem);
+                } else {
+                    const oldItem = oldMap.get(newItem.id);
+                    if (oldItem.rarity !== newItem.rarity || oldItem.name !== newItem.name) {
+                        modified.push({ id: newItem.id, name: newItem.name, prop: 'Rarity / Name', oldVal: `${oldItem.name} (Rarity ${oldItem.rarity})`, newVal: `${newItem.name} (Rarity ${newItem.rarity})` });
+                    }
+                }
+            });
+
+            document.getElementById('diff-added-count').innerText = `Item Baru: ${added.length}`;
+            document.getElementById('diff-modified-count').innerText = `Diubah: ${modified.length}`;
+
+            const addedTable = document.getElementById('diff-added-table');
+            addedTable.innerHTML = '';
+            if (added.length === 0) {
+                addedTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">Tidak ada item baru ditambahkan.</td></tr>`;
+            } else {
+                added.forEach(i => {
+                    addedTable.innerHTML += `
+                        <tr class="hover:bg-gt-dark/80 transition">
+                            <td class="p-3 font-mono text-emerald-400 font-bold">#${i.id}</td>
+                            <td class="p-3 font-bold text-white">${i.name}</td>
+                            <td class="p-3">Rarity ${i.rarity}</td>
+                            <td class="p-3">${getActionTypeName(i.actionType)}</td>
+                            <td class="p-3 text-amber-400 font-mono text-[11px]">${i.upcomingReason || 'Added Item'}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const modTable = document.getElementById('diff-modified-table');
+            modTable.innerHTML = '';
+            if (modified.length === 0) {
+                modTable.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">Tidak ada perubahan stat item.</td></tr>`;
+            } else {
+                modified.forEach(m => {
+                    modTable.innerHTML += `
+                        <tr class="hover:bg-gt-dark/80 transition">
+                            <td class="p-3 font-mono text-amber-400 font-bold">#${m.id}</td>
+                            <td class="p-3 font-bold text-white">${m.name}</td>
+                            <td class="p-3 text-cyan-300 font-mono">${m.prop}</td>
+                            <td class="p-3 text-slate-400 strike-through">${m.oldVal}</td>
+                            <td class="p-3 text-emerald-400 font-semibold">${m.newVal}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            showToast("Analisis Diff Selesai", `Ditemukan ${added.length} item baru & ${modified.length} item diubah.`, "success");
+        }
+
+        function updateRefreshIntervalSetting() {
+            autoRefreshIntervalSec = parseInt(document.getElementById('config-interval-select').value);
+            autoRefreshCountdown = autoRefreshIntervalSec;
+            if (autoRefreshEnabled) {
+                document.getElementById('autorefresh-status-text').innerText = `ON (${autoRefreshIntervalSec}s)`;
+            }
+        }
+
+        function updateFeedSourceSetting() {
+            feedSource = document.getElementById('config-source-select').value;
+            showToast("Sumber Data Diubah", `Sumber beralih ke mode: ${feedSource}`, "info");
+        }
+
+        // TOASTS & AUDIO
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            let borderColors = "border-emerald-500/40 text-emerald-400";
+            if (type === 'leak') borderColors = "border-amber-500/40 text-amber-400";
+            if (type === 'error') borderColors = "border-red-500/40 text-red-400";
+
+            toast.className = `p-4 rounded-xl bg-gt-card border ${borderColors} shadow-2xl transition transform duration-200 pointer-events-auto space-y-1 animate-in fade-in slide-in-from-top-2`;
+            toast.innerHTML = `
+                <div class="flex items-center justify-between gap-2">
+                    <h4 class="font-bold text-xs text-white">${title}</h4>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-slate-400 hover:text-white text-xs">&times;</button>
+                </div>
+                <p class="text-[11px] text-slate-300">${message}</p>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function playAlertSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.25);
+            } catch(e) {}
+        }
+
+        // EXPORT REPORTS
+        function exportItemsJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(itemsDatabase, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `gt_items_export_${Date.now()}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        function exportUpcomingReport(type) {
+            if (type === 'json') {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(upcomingDatabase, null, 2));
+                const dlAnchor = document.createElement('a');
+                dlAnchor.setAttribute("href", dataStr);
+                dlAnchor.setAttribute("download", `gt_upcoming_leaks_${Date.now()}.json`);
+                document.body.appendChild(dlAnchor);
+                dlAnchor.click();
+                dlAnchor.remove();
+            } else {
+                let report = `=== GROWTOPIA LIVE LEAKS & UPCOMING REPORT ===\nGenerated: ${new Date().toLocaleString()}\nTotal Leaks: ${upcomingDatabase.length}\n\n`;
+                upcomingDatabase.forEach(item => {
+                    report += `ID: #${item.id}\nNama: ${item.name}\nRarity: ${item.rarity}\nAksi: ${getActionTypeName(item.actionType)}\nDetail Deteksi: ${item.upcomingReason || 'N/A'}\n-----------------------------------\n`;
+                });
+                const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(report);
+                const dlAnchor = document.createElement('a');
+                dlAnchor.setAttribute("href", dataStr);
+                dlAnchor.setAttribute("download", `gt_leaks_report_${Date.now()}.txt`);
+                document.body.appendChild(dlAnchor);
+                dlAnchor.click();
+                dlAnchor.remove();
+            }
+        }
+    </script>
+</body>
+</html>
